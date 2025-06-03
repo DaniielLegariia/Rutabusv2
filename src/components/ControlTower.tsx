@@ -29,7 +29,7 @@ export const ControlTower: React.FC<ControlTowerProps> = ({
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Torre de Control - Rutabus</h1>
-            <p className="text-gray-600 text-sm">Seguimiento en tiempo real del personal</p>
+            <p className="text-gray-600 text-sm">Seguimiento en tiempo real de unidades</p>
           </div>
           <div className="flex items-center gap-4">
             <div className="flex gap-2">

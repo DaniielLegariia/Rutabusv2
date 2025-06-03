@@ -204,18 +204,19 @@ export const getListGeofences = async (idcliente: string) => {
   }
 }
 
-export const insertGeofence = async (idgeo: number, name: string, shortName: string, idcliente: string, sectionTime: number, transitSectionTime: number, coordinates: string, tipogeo: number) => {
-  const geofence = {
-    idgeo,
-    name,
-    shortName,
-    idcliente,
-    sectionTime,
-    transitSectionTime,
-    coordinates,
-    tipogeo
-  };
+export interface GeofenceInsertData {
+  idgeo: number;
+  name: string;
+  shortName: string;
+  idcliente: string;
+  sectionTime: number;
+  transitSectionTime: number;
+  coordinates: string;
+  tipogeo: number;
+  radius?: number;
+}
 
+export const insertGeofence = async (geofenceData: GeofenceInsertData) => {
   try {
     const response = await fetch(
       `https://mlujjag146.execute-api.us-east-1.amazonaws.com/rutabus/geocercas/insert`,
@@ -224,7 +225,7 @@ export const insertGeofence = async (idgeo: number, name: string, shortName: str
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(geofence),
+        body: JSON.stringify(geofenceData),
       }
     );
     return response;
