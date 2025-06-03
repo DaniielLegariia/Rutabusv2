@@ -149,4 +149,81 @@ export const calculateETA = (vehicle: Vehicle, route: Route, currentTime: Date |
   eta.setMinutes(eta.getMinutes() + totalRemainingTime);
   
   return eta;
+};
+
+export const getVehicleStatusColor = (status: string): string => {
+  // Debug log
+  console.log('getVehicleStatusColor input:', { status });
+  
+  const normalizedStatus = status?.toLowerCase().trim();
+  console.log('Normalized status:', normalizedStatus);
+  
+  switch (normalizedStatus) {
+    case 'a tiempo':
+      return 'text-green-600';
+    case 'retrasado':
+      return 'text-red-600';
+    case 'en tránsito':
+    case 'en transito':
+      return 'text-blue-600';
+    case 'en parada':
+      return 'text-purple-600';
+    default:
+      console.log('Warning: Unknown status, defaulting to gray', { originalStatus: status, normalized: normalizedStatus });
+      return 'text-gray-600';
+  }
+};
+
+export const formatETA = (time: Date | string | null): string => {
+  if (!time) return '--:--';
+  
+  try {
+    console.log('formatETA input:', { 
+      time, 
+      type: typeof time,
+      rawValue: time.toString(),
+      isDate: time instanceof Date
+    });
+    
+    let date: Date;
+    if (typeof time === 'string') {
+      // Si es una fecha ISO, la parseamos
+      date = new Date(time);
+      console.log('Parsed string to date:', {
+        originalString: time,
+        parsedDate: date,
+        hours: date.getHours(),
+        minutes: date.getMinutes()
+      });
+    } else {
+      date = time;
+      console.log('Using date directly:', {
+        date: date,
+        hours: date.getHours(),
+        minutes: date.getMinutes()
+      });
+    }
+    
+    if (isNaN(date.getTime())) {
+      console.log('Invalid date detected');
+      return '--:--';
+    }
+    
+    // Formatear manualmente para asegurar el formato correcto
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    
+    console.log('Time components:', {
+      hours,
+      minutes,
+      rawHours: date.getHours(),
+      rawMinutes: date.getMinutes(),
+      formattedResult: `${hours}:${minutes}`
+    });
+    
+    return `${hours}:${minutes}`;
+  } catch (error) {
+    console.error('Error formatting time:', error);
+    return '--:--';
+  }
 }; 
