@@ -21,12 +21,14 @@ export const RouteVisualization: React.FC<RouteVisualizationProps> = ({
   route,
   simulationTime,
 }) => {
-  const getVehicleColor = (vehicleId: string) => {
-    if (vehicleId.includes('TN')) return 'text-blue-600';
-    if (vehicleId.includes('TS')) return 'text-green-600';
-    if (vehicleId.includes('TE')) return 'text-purple-600';
-    if (vehicleId.includes('TO')) return 'text-orange-600';
-    if (vehicleId.includes('TC')) return 'text-red-600';
+  const getVehicleColor = () => {
+    // Extraer el prefijo de la ruta del nombre de la ruta
+    const routePrefix = route.name.split(' ')[0].toUpperCase();
+    if (routePrefix.includes('NORTE')) return 'text-blue-600';
+    if (routePrefix.includes('SUR')) return 'text-green-600';
+    if (routePrefix.includes('ESTE')) return 'text-purple-600';
+    if (routePrefix.includes('OESTE')) return 'text-orange-600';
+    if (routePrefix.includes('CENTRO')) return 'text-red-600';
     return 'text-gray-600';
   };
 
@@ -62,6 +64,16 @@ export const RouteVisualization: React.FC<RouteVisualizationProps> = ({
       const eta = new Date(vehicle.stepEtas[stop.shortName]);
       if (!isNaN(eta.getTime())) {
         return eta.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+      }
+    }
+    return '--';
+  }
+
+  function getTransitionTime(vehicle: ExtendedVehicle) {
+    if (vehicle?.transitionTime) {
+      const transition = new Date(vehicle.transitionTime);
+      if (!isNaN(transition.getTime())) {
+        return transition.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
       }
     }
     return '--';
@@ -119,26 +131,27 @@ export const RouteVisualization: React.FC<RouteVisualizationProps> = ({
               <div key={stop.id} className="flex flex-col items-center relative flex-1">
                 {/* Camiones en la parada */}
                 {vehiclesAtStop.length > 0 && (
-                  <div className="absolute left-1/2 transform -translate-x-1/2 z-50" style={{ top: '-8px' }}>
+                  <div className="absolute left-1/2 transform -translate-x-1/2 z-50" style={{ top: '-48px' }}>
                     <div className="relative z-50">
-                      <div className="bg-white rounded-lg p-1 shadow-md">
-                        <Truck 
-                          className={`w-6 h-6 ${getVehicleColor(vehiclesAtStop[0].id)} hover:scale-110 transition-transform cursor-pointer`}
-                        />
-                        {vehiclesAtStop.length > 1 && (
-                          <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
-                            {vehiclesAtStop.length}
-                          </span>
-                        )}
-                      </div>
                       {vehiclesAtStop.map((vehicle, vehicleIndex) => (
-                        <span 
-                          key={vehicle.id}
-                          className="absolute left-1/2 transform -translate-x-1/2 text-xs font-semibold text-gray-700 bg-white px-1 rounded shadow-md border whitespace-nowrap z-50"
-                          style={{ bottom: `${(vehiclesAtStop.length - vehicleIndex) * 24 + 28}px` }}
-                        >
-                          {vehicle.id}
-                        </span>
+                        <div key={vehicle.id} className="flex flex-col items-center" style={{ marginBottom: vehicleIndex > 0 ? '40px' : '0' }}>
+                          <span className="text-xs font-semibold text-gray-700 bg-white px-2 py-0.5 rounded shadow-md border whitespace-nowrap mb-2">
+                            {vehicle.id}
+                          </span>
+                          <div className="bg-white rounded-lg p-1 shadow-md mb-1">
+                            <Truck 
+                              className={`w-6 h-6 ${getVehicleColor()} hover:scale-110 transition-transform cursor-pointer`}
+                            />
+                          </div>
+                          <span className="text-xs font-medium text-blue-600">
+                            {getStepTimeDisplay(vehicle as ExtendedVehicle, stop)}
+                          </span>
+                          {vehiclesAtStop.length > 1 && vehicleIndex === 0 && (
+                            <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                              {vehiclesAtStop.length}
+                            </span>
+                          )}
+                        </div>
                       ))}
                     </div>
                   </div>
@@ -158,24 +171,25 @@ export const RouteVisualization: React.FC<RouteVisualizationProps> = ({
                     {vehiclesInTransit.length > 0 && (
                       <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
                         <div className="relative z-50">
-                          <div className="bg-white rounded-lg p-1 shadow-md">
-                            <Truck 
-                              className={`w-6 h-6 ${getVehicleColor(vehiclesInTransit[0].id)} hover:scale-110 transition-transform cursor-pointer animate-pulse`}
-                            />
-                            {vehiclesInTransit.length > 1 && (
-                              <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
-                                {vehiclesInTransit.length}
-                              </span>
-                            )}
-                          </div>
                           {vehiclesInTransit.map((vehicle, vehicleIndex) => (
-                            <span 
-                              key={vehicle.id}
-                              className="absolute left-1/2 transform -translate-x-1/2 text-xs font-semibold text-gray-700 bg-white px-1 rounded shadow-md border whitespace-nowrap z-50"
-                              style={{ bottom: `${(vehiclesInTransit.length - vehicleIndex) * 24 + 28}px` }}
-                            >
-                              {vehicle.id}
-                            </span>
+                            <div key={vehicle.id} className="flex flex-col items-center" style={{ marginBottom: vehicleIndex > 0 ? '40px' : '0' }}>
+                              <span className="text-xs font-semibold text-gray-700 bg-white px-2 py-0.5 rounded shadow-md border whitespace-nowrap mb-2">
+                                {vehicle.id}
+                              </span>
+                              <div className="bg-white rounded-lg p-1 shadow-md mb-1">
+                                <Truck 
+                                  className={`w-6 h-6 ${getVehicleColor()} hover:scale-110 transition-transform cursor-pointer animate-pulse`}
+                                />
+                              </div>
+                              <span className="text-xs font-medium text-blue-600">
+                                {getTransitionTime(vehicle as ExtendedVehicle)}
+                              </span>
+                              {vehiclesInTransit.length > 1 && vehicleIndex === 0 && (
+                                <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                                  {vehiclesInTransit.length}
+                                </span>
+                              )}
+                            </div>
                           ))}
                         </div>
                       </div>
