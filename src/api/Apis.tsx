@@ -1,5 +1,6 @@
 import { message } from 'antd';
 import axios from 'axios';
+import type { VehicleFromPlatform } from '../types/vehicle';
 
 const API_BASE_URL = 'https://mlujjag146.execute-api.us-east-1.amazonaws.com/rutabus/units';
 
@@ -448,3 +449,17 @@ export const getLastEventUnits = async (idcliente: string[]) => {
     return [];
   }
 }
+
+export const getPlatformVehicles = async (idcliente: string, idusu: string): Promise<VehicleFromPlatform[]> => {
+  try {
+    const response = await fetch(
+      `https://test.tcvsat.com.mx/tcvback/v3/api/get/units/rutabus?idusu=${idusu}&idcliente=${idcliente}&page=1&limit=500`
+    );
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching platform vehicles:', error);
+    message.error('Error al obtener los vehículos de la plataforma');
+    return [];
+  }
+};
